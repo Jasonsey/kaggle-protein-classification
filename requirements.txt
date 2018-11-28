@@ -1,0 +1,9 @@
+keras
+tensorflow-gpu==1.5.0
+sklearn
+
+Pillow
+pandas
+numpy
+
+easydict
