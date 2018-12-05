@@ -301,7 +301,7 @@ def load_img(directory, fname_id, grayscale=False, color_layer='rgb', target_siz
         if target_size:
             img = img.resize(target_size)
         arrays.append(np.asarray(img))
-    arrays = np.asarray(arrays)
+    arrays = np.asarray(arrays, dtype=K.floatx())
     if data_format == 'channels_last':
         arrays = np.transpose(arrays, axes=[1, 2, 0])
     return arrays

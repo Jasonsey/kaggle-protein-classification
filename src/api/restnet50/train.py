@@ -26,7 +26,7 @@ def train(model, input_dataset: EasyDict, model_direction, pretrain_model):
     model.fit_generator(
         input_dataset.train,
         steps_per_epoch=input_dataset.train_steps,
-        epochs=10000,
+        epochs=config.EPOCHS,
         validation_data=(input_dataset.test.data, input_dataset.test.labels),
         verbose=1,
         workers=cpu_count()-1,
@@ -47,7 +47,7 @@ def main():
         path=database_path,
         batch_size=batch_size,
         use_cache=True,
-        colors=['red', 'green', 'blue']
+        colors=config.COLORS
     )
 
     model = MODEL(input_shape=input_dataset.input_shape, class_weight=input_dataset.class_weight)

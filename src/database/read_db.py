@@ -152,7 +152,7 @@ def read_database2(path: Union[str, Path], batch_size=128, colors=['green'], **k
 
     validation_split = 0.2
     train_datagen = MyImageDataGenerator(
-        rescale=None,
+        rescale=1/255,
         rotation_range=360,
         width_shift_range=0.2,
         height_shift_range=0.2,
