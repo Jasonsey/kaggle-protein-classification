@@ -1,17 +1,26 @@
 import os
 
-from api.restnet50.train import main as res50_train
+from api.result.detection import ModelDetection
 
-import config
-from utils.logging_tools import set_logger
+import setting
+from commons.logging_tools import set_logger
 
 
-def main():
-    os.environ["CUDA_VISIBLE_DEVICES"] = config.CUDA_VISIBLE_DEVICES
-    set_logger(config.LOGGING_NAME)
+def main(flag):
+    os.environ["CUDA_VISIBLE_DEVICES"] = setting.CUDA_VISIBLE_DEVICES
+    set_logger(setting.LOGGING_NAME)
     
-    res50_train()
+    if flag == 1:
+        maxmodel_train()
+    elif flag == 2:
+        # predict maxmodel_4_0
+        detection = ModelDetection(modelfile='ckpt_model.val_f1.best.h5', model_home='../data/output/models/protein_maxmodel_4_0', colors=['red', 'green', 'blue', 'yellow'])
+        detection.predict(batch_size=setting.FORWARD_BATCH_SIZE)
+    elif flag == 3:
+        # predict maxmodel_5_0
+        detection = ModelDetection(modelfile='ckpt_model.val_f1.best.h5', model_home='../data/output/models/protein_maxmodel_5_0', colors=['red', 'green', 'blue', 'yellow'])
+        detection.predict(batch_size=setting.FORWARD_BATCH_SIZE)
 
 
 if __name__ == "__main__":
-    main()
+    main(1)

@@ -5,5 +5,8 @@ sklearn
 Pillow
 pandas
 numpy
+matplotlib
 
 easydict
+tqdm
+requests

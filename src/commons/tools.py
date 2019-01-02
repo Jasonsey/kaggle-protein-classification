@@ -8,14 +8,21 @@ from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator, Iterator, array_to_img
 from sklearn.preprocessing import MultiLabelBinarizer
 
+import setting
+from api.encoder_model import detection
+
 
 
 def resize(im: Image.Image, size):
-    im = im.resize(size, Image.ANTIALIAS)
+    if size != (512, 512):
+        im = im.resize(size, Image.ANTIALIAS)
     return im
 
+def img_to_array(im: Image.Image):
+    x = np.asarray(im, dtype=K.floatx())
+    return x
 
-def normalized_img(im: Image.Image):
+def normalized_img(im: np.ndarray):
     # # normalize tensor: center on 0., ensure std is 0.1
     # x = np.asarray(im, dtype='float32')
     # x -= x.mean()
@@ -25,13 +32,19 @@ def normalized_img(im: Image.Image):
     # # clip to [0, 1],
     # x += 0.5    # 曲线移动到0.5为中心
     # x = np.clip(, 0, 1)    # 小于0的都为0，大于0的都为1
-    x = np.asarray(im, dtype=K.floatx())
-    x /= 255
-    return x
+    im /= 255
+    return im
 
 
-def deprocess_img(im: Image.Image, size=(256, 256)):
+def deprocess_img(im: Image.Image, size=(256, 256), datagen=None):
     im = resize(im, size=size)
+    im = img_to_array(im)
+
+    if datagen is not None:
+        params = datagen.get_random_transform(im.shape)
+        im = datagen.apply_transform(im, params)
+        im = datagen.standardize(im)
+
     im_array = normalized_img(im)
     return im_array
 
@@ -46,20 +59,22 @@ def init_path(paths: List):
             p.mkdir(parents=True)
 
 
-def get_array_label(path_row_colors):
+def get_array_label(path_row_colors, datagen=None):
     '''根据颜色选择读取的矩阵组合后的维度
 
     需要输入带有三个参数组合成的tuple
     '''
     path, row, colors = path_row_colors
-    img_id, label = row['Id'], tuple([int(i) for i in row['Target'].split()])
+    img_id = row.get('Id')
+    target = row.get('Target')
+    label = tuple([int(i) for i in target.split()]) if target is not None else (0,)
 
     img_paths = [path / (img_id + '_' + color + '.png') for color in colors]
     
     imgs = []
     for img_path in img_paths:
         img = Image.open(img_path)
-        img_array = deprocess_img(img, size=(224, 224))
+        img_array = deprocess_img(img, size=setting.TARGET_SIZE)
         imgs.append(img_array)
     imgs = np.asarray(imgs)
     imgs = np.transpose(imgs, axes=[1, 2, 0])
@@ -70,11 +85,16 @@ def get_array_label(path_row_colors):
 class MyImageDataGenerator(ImageDataGenerator):
     '''添加从生成器中创建新的flow_from_generator方法
     '''
-    def flow_flow_mydataframe(self, **kwargs):
+    def flow_from_mydataframe(self, **kwargs):
         '''Iterator capable of reading images from a directory on disk
             through a dataframe.
         '''
         return MyDataFrameIterator(**kwargs, image_data_generator=self)
+    
+    def flow_from_myarray(self, X: np.ndarray, Y: np.ndarray, encoder, batch_size=16):
+        '''flow from array and forward into encoder
+        '''
+        return mygenerator(X, Y, self, encoder, batch_size)
 
 
 class MyDataFrameIterator(Iterator):
@@ -306,9 +326,22 @@ def load_img(directory, fname_id, grayscale=False, color_layer='rgb', target_siz
         arrays = np.transpose(arrays, axes=[1, 2, 0])
     return arrays
 
-    
 
+def mygenerator(X: np.ndarray, Y: np.ndarray, image_data_generator, encoder, batch_size=16):
+    index = list(range(len(Y)))
+    while True:
+        np.random.shuffle(index)
+        for i in range(0, len(Y), batch_size):
+            batch_index = index[i:i+batch_size]
+            data = X[batch_index]
+            batch_y = Y[batch_index]
 
-
-    
-
+            batch_x = np.zeros_like(data, dtype=K.floatx())
+            for ii in range(len(batch_index)):
+                x = data[ii]
+                params = image_data_generator.get_random_transform(x.shape)
+                x = image_data_generator.apply_transform(x, params)
+                x = image_data_generator.standardize(x)
+                batch_x[ii] = x
+            batch_x = detection.predict(batch_x, encoder)
+            yield batch_x, batch_y

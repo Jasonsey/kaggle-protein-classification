@@ -1,14 +1,14 @@
 import logging
 from pathlib import Path
 
-import config
+import setting
 
 
 def set_logger(log_name='protein'):
     logger = logging.getLogger(log_name)
     logger.setLevel(logging.DEBUG)  # 总开关
 
-    fh = logging.FileHandler(Path(config.LOGGING_HOME) / (config.LOGGING_NAME + '.run.log'))
+    fh = logging.FileHandler(Path(setting.LOGGING_HOME) / (setting.LOGGING_NAME + '.run.log'))
     fh.setLevel(logging.DEBUG)
 
     ch = logging.StreamHandler()
