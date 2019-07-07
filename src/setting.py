@@ -4,7 +4,7 @@ Config File
 from pathlib import Path
 
 
-CUDA_VISIBLE_DEVICES = '3'
+CUDA_VISIBLE_DEVICES = '2'
 CLASSES = 28
 BATCH_SIZE = 16  # 单GPU上的batch大小
 FORWARD_BATCH_SIZE = 32
@@ -15,8 +15,8 @@ TARGET_SIZE = (512, 512)
 COLORS = ['red', 'green', 'blue', 'yellow']
 
 # -------------------logger config ----------------
-LOGGING_NAME = 'protein_maxmodel_4_0'
-# LOGGING_NAME = 'protein_maxmodel_5_0'
+# LOGGING_NAME = 'protein_maxmodel_4_0'
+LOGGING_NAME = 'protein_maxmodel_5_0'
 # LOGGING_NAME = 'protein_maxmodel_predict_4_0'
 # LOGGING_NAME = 'protein_maxmodel_predict_5_0'
 

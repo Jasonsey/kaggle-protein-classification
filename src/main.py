@@ -1,6 +1,7 @@
 import os
 
 from api.result.detection import ModelDetection
+from api.maxmodel.train import main as maxmodel_train
 
 import setting
 from commons.logging_tools import set_logger

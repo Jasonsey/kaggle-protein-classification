@@ -16,7 +16,7 @@ from api.applications.inception_resnet_v2 import InceptionResNetV2
 LOGGER = logging.getLogger(setting.LOGGING_NAME)
 
 
-def get_model(input_shape=(1024, ), class_weight=None, deep=4, lambd=0):
+def get_model(input_shape=(1024, ), class_weight=None, deep=5, lambd=0):
     LOGGER.info('Net Input Shape: %s' % str(input_shape))
 
     net_input = layers.Input(shape=input_shape)
@@ -36,11 +36,13 @@ def get_model(input_shape=(1024, ), class_weight=None, deep=4, lambd=0):
     return model
 
 
-def conv_bn(input_tensor, deep=4, lambd=0.0, ks=3, start_filters=32):
+def conv_bn(input_tensor, deep, lambd, ks=3, start_filters=32):
     x = input_tensor
+    re = 0.001
     for i in range(deep):
         for _ in range(2):
-            x = layers.Conv2D(start_filters * 2 ** i, ks, padding='same', kernel_regularizer=regularizers.l2(lambd))(x)
+            x = layers.Conv2D(start_filters * 2 ** i, ks, padding='same', kernel_regularizer=regularizers.l2(re or lambd))(x)
+            re = 0.0
             x = layers.BatchNormalization()(x)
             x = layers.Activation('relu')(x)
         x = layers.MaxPool2D((2, 2), (2, 2))(x)

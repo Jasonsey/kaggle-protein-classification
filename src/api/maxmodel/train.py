@@ -38,7 +38,7 @@ def train(model, input_dataset: EasyDict, model_direction, pretrain_model):
 
 
 def main():
-    database_path = '../data/input'
+    database_path = '../data/input/moredata'
     model_direction = '../data/output/models/'
     batch_size = setting.BATCH_SIZE
     pretrain_model = None
